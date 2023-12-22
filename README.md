@@ -9,3 +9,9 @@ __Development of Aerial Manipulator System for Object Manipulation__
 > D.A.S.O.M Project's repository link of manipulator: [D.A.S.O.M](https://github.com/S-CHOI-S/D.A.S.O.M.git)
 
 > More information on the D.A.S.O.M Project is in [D.A.S.O.M](https://github.com/S-CHOI-S/D.A.S.O.M.git)
+
+<br/>
+
+__Enjoy your flight!!__  
+
+<img align="left" src="https://github.com/S-CHOI-S/D.A.S.O.M-Palletrone/assets/113012648/8f4c2729-55d8-42b1-918b-618cac6af98d" width="50%" height="50%"/>  
