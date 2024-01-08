@@ -1038,6 +1038,10 @@ void setSA(){
 
 	invSA = SA.inverse();
 }
+
+double dasom_X_d_limit = 0;
+double dasom_Y_d_limit = 0;
+
 void rpyT_ctrl() {
 	pid_Gain_Setting();
 	y_d_tangent=y_vel_limit*(((double)Sbus[0]-(double)1500)/(double)500);
@@ -1050,7 +1054,7 @@ void rpyT_ctrl() {
 		else if(Sbus[2]<1200){
 			Z_d+=0.0005;
 		}
-					if(Z_d <-0.7) Z_d=-0.7 + dasom_sine;
+					if(Z_d <-0.8) Z_d=-0.8 + dasom_sine;
 		if(Z_d > 0) Z_d=0;
 	//Z_d = -altitude_limit*(((double)Sbus[2]-(double)1500)/(double)500)-altitude_limit;
 	}
@@ -1109,12 +1113,21 @@ void rpyT_ctrl() {
 	if (movingFlag) dasom_sineGenerator();
 
 	if(position_mode || velocity_mode){
-		torque_dob();
+		torque_dob(); // dasom dob
 		if(position_mode){ // Dasom
 			if(!position_joystick_control) // joystick control mode가 아닐 때(gimbaling or gimabling + command)
-			{
-				X_d -= paletrone_command_velocity*(((double)Sbus[1]-(double)1500)/(double)500)*delta_t.count(); // 이걸 바꾼다 // Sbus에서 들어오는 신호 값에 따라 부호가 다르다
-				Y_d += paletrone_command_velocity*(((double)Sbus[3]-(double)1500)/(double)500)*delta_t.count(); // Sbus에서 들어오는 신호 값에 따라 부호가 다르다
+			{	
+				dasom_X_d_limit = paletrone_command_velocity*(((double)Sbus[1]-(double)1500)/(double)500)*delta_t.count();
+				dasom_Y_d_limit = paletrone_command_velocity*(((double)Sbus[3]-(double)1500)/(double)500)*delta_t.count();
+			
+				ROS_INFO("X_d limit = %lf", dasom_X_d_limit);
+				ROS_WARN("Y_d limit = %lf", dasom_Y_d_limit);
+				
+				if(abs(dasom_X_d_limit) < 0.0001) dasom_X_d_limit = 0.0;
+				if(abs(dasom_Y_d_limit) < 0.0001) dasom_Y_d_limit = 0.0;
+
+				X_d -= dasom_X_d_limit; // 이걸 바꾼다 // Sbus에서 들어오는 신호 값에 따라 부호가 다르다
+				Y_d += dasom_Y_d_limit; // Sbus에서 들어오는 신호 값에 따라 부호가 다르다
 			
 				ROS_INFO("FUTABA MODE!!!");
 			}
@@ -1442,6 +1455,8 @@ void sbusCallback(const std_msgs::Int16MultiArray::ConstPtr& array){
 	for(int i=0;i<10;i++){
 		Sbus[i]=map<int16_t>(array->data[i], 352, 1696, 1000, 2000);
 	}
+
+	// if(Sbus[1]<1050 && Sbus[1]>1020) Sbus[1] = 1033;
 	
 	if(Sbus[4]<1500) {
 		kill_mode=true;
